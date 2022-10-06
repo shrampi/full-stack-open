@@ -1,0 +1,9 @@
+title FSO SPA Notes
+
+note over Browser: 
+Form event handler triggered by button press.
+spa.js removes top note element and appends new 
+note element with form input data.
+end note
+Browser -> Server: POST request to https://studies.cs.helsinki.fi/exampleapp/new_note_spa
+note over Server: data appended to JSON file
