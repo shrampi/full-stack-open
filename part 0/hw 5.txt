@@ -1,0 +1,15 @@
+title FSO SPA Notes
+
+Browser->Server: GET request https://studies.cs.helsinki.fi/exampleapp/spa
+Server->Browser: Notes page html
+Browser->Server: GET request to https://studies.cs.helsinki.fi/exampleapp/main.css
+Server->Browser: main.css
+Browser->Server: GET request to https://studies.cs.helsinki.fi/exampleapp/spa.js
+Server->Browser: spa.js
+note over Browser: 
+spa.js code executes and adds event listener to form, 
+also requests notes json data
+end note
+Browser->Server: GET request to https://studies.cs.helsinki.fi/exampleapp/data.json
+Server->Browser: data.json
+note over Browser: spa.js converts json data into an html list and displays on page

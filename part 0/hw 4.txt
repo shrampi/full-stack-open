@@ -1,0 +1,15 @@
+title FSO Notes
+
+Browser->Server: POST request to https://studies.cs.helsinki.fi/exampleapp/new_note
+note over Server: server executes js code that adds form value to list of notes
+Server->Browser: Status 302 Redirect
+Browser->Server: GET request to https://studies.cs.helsinki.fi/exampleapp/notes
+Server->Browser: Notes page html
+Browser->Server: GET request to https://studies.cs.helsinki.fi/exampleapp/main.css
+Server->Browser: main.css
+Browser->Server: GET request to https://studies.cs.helsinki.fi/exampleapp/main.js
+Server->Browser: main.js
+note over Browser: main.js code executes and requests notes json data
+Browser->Server: GET request to https://studies.cs.helsinki.fi/exampleapp/data.json
+Server->Browser: data.json
+note over Browser: main.js converts json data into an html list and displays on page
