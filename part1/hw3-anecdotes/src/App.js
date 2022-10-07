@@ -1,6 +1,19 @@
 import { useState } from 'react'
 
-const Button = ({ text, onClick }) => <button onClick={onClick}>{text}</button>;
+const Button = ({ text, onClick }) => (<button onClick={onClick}>{text}</button>)
+
+const VoteCount = ({ count }) => (<div>has {count} votes</div>)
+
+const AnecdoteDisplay = (props) => {
+  return (
+    <div>
+      <h1>{props.title}</h1>
+      <div>{props.anecdote}</div>
+      <VoteCount count={props.votes} />
+    </div>
+  )
+}
+
 
 const App = () => {
   const anecdotes = [
@@ -13,18 +26,32 @@ const App = () => {
     'Programming without an extremely heavy use of console.log is same as if a doctor would refuse to use x-rays or blood tests when diagnosing patients.'
   ]
    
-  const [selected, setSelected] = useState(0)
+  const [selected, setSelected] = useState(0);
+  const [votes, setVotes] = useState(
+    [0, 0, 0, 0, 0, 0, 0]
+  );
+  const [maxIndex, setMaxIndex] = useState(0);
 
-  const pickRandomAnecdote = () => {
+  const pickNewAnecdote = () => {
     let i = Math.floor(Math.random() * anecdotes.length);
-    console.log(i);
     setSelected(i);
+  }
+
+  const incrementSelectedAnecdote = () => {
+      let v = [...votes];
+      v[selected] += 1;
+      if (v[selected] > v[maxIndex]) {
+        setMaxIndex(selected);
+      }
+      setVotes(v);
   }
 
   return (
     <div>
-      <div>{anecdotes[selected]}</div>
-      <Button text="Randomize" onClick={pickRandomAnecdote} />
+      <AnecdoteDisplay title="Anecdote of the day" anecdote={anecdotes[selected]} votes={votes[selected]} />
+      <Button text="Vote" onClick={incrementSelectedAnecdote} />
+      <Button text="Randomize" onClick={pickNewAnecdote} />
+      <AnecdoteDisplay title="Anecdote with most votes" anecdote={anecdotes[maxIndex]} votes={votes[maxIndex]} />
     </div>
   )
 }
