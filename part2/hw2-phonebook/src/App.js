@@ -1,45 +1,9 @@
 import { useState } from 'react';
 import { useEffect } from 'react';
-import axios from 'axios';
-
-const ControlledTextInput = (props) => {
-  return (
-    <div>
-      {props.label}<input onChange={props.onChange} value={props.value} />
-    </div>
-  );
-}
-
-const AddContactForm = (props) => {
-  return (
-    <div>
-      <h2>Add New Contact</h2>
-      <form onSubmit={props.addName}>
-        <ControlledTextInput label="name:" onChange={props.onNameChange} value={props.name} />
-        <ControlledTextInput label="number:" onChange={props.onNumberChange} value={props.number} />
-        <div>
-          <button type="submit">add</button>
-        </div>
-      </form>
-    </div>
-  );
-}
-
-const NumbersList = ({ persons, filter }) => {
-  return (
-    <div>
-      <h2>Numbers</h2>
-      {
-        persons.filter(person => person.name.toLowerCase().indexOf(filter) !== -1)
-        .map(person =>
-          <PersonInformation key={person.name} person={person} />
-        )
-      }
-    </div>
-  );
-}
-
-const PersonInformation = ({ person }) => (<div>{person.name} {person.number}</div>)
+import phonebookService from './services/phonebook';
+import ControlledTextInput from './components/ControlledTextInput';
+import AddContactForm from './components/AddContactForm';
+import PersonList from './components/PersonList.js';
 
 const App = () => {
   const [persons, setPersons] = useState([]);
@@ -47,14 +11,15 @@ const App = () => {
   const [newNumber, setNewNumber] = useState('');
   const [filter, setFilter] = useState('');
 
+
   const hook = () => {
-    axios.get('http://localhost:3001/persons')
-      .then((response) => {setPersons(response.data)});
+    phonebookService.getAll()
+      .then(data => setPersons(data));
   }
 
   useEffect(hook, []);
 
-  const addName = (event) => {
+  const addPerson = (event) => {
     event.preventDefault();
     if (persons.map(p => p.name).includes(newName)) {
       alert(`${newName} is already added to phonebook`);
@@ -68,9 +33,23 @@ const App = () => {
       alert("Number cannot be blank");
       return;
     }
-    setPersons(persons.concat({ name: newName, number: newNumber }));
+
+    const newID = Math.max(persons.map(person => person.id)) + 1;
+    const newPerson = { name: newName, number: newNumber, id: newID };
+
+    phonebookService.create(newPerson)
+      .then(data => setPersons(persons.concat(data)));
+
+    // setPersons(persons.concat({ name: newName, number: newNumber }));
     setNewName('');
     setNewNumber('');
+  }
+
+  const deletePerson = (person) => {
+    if (window.confirm(`Are you sure your want to delete ${person.name}?`)) {
+      phonebookService.deletePerson(person);
+      setPersons(persons.filter(p => p.id !== person.id)); 
+    }
   }
 
   const updateNameInput = (event) => {
@@ -82,17 +61,18 @@ const App = () => {
   }
 
   const updateFilterInput = (event) => {
-    setFilter(event.target.value.toLowerCase()  );
+    setFilter(event.target.value.toLowerCase());
   }
 
-  //const personsToDisplay = persons.filter()
+  const personsToDisplay = 
+    persons.filter(person => person.name.toLowerCase().indexOf(filter) !== -1)
 
   return (
     <div>
       <h1>Phonebook</h1>
       <ControlledTextInput onChange={updateFilterInput} value={filter} />
-      <AddContactForm addName={addName} onNameChange={updateNameInput} onNumberChange={updateNumberInput} name={newName} number={newNumber} />
-      <NumbersList persons={persons} filter={filter} />
+      <AddContactForm addName={addPerson} onNameChange={updateNameInput} onNumberChange={updateNumberInput} name={newName} number={newNumber} />
+      <PersonList persons={personsToDisplay} deletePerson={deletePerson} />
     </div>
   )
 }

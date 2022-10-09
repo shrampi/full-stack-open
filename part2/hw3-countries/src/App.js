@@ -44,18 +44,18 @@ const CountryInfo = ({ country }) => {
       <h3>Languages:</h3>
       <CountryLanguages country={country} />
       <CountryFlag country={country} />
-      <Weather country={country} />
     </div>
   );
 }
 
 const Weather = ({ country }) => {
-  const temp = 0 // TODO: get temp from api
+  const temp = 0; // TODO: get temp from api
+  const wind = 0;
   return(
     <div>
-      temperature: {temp} Celsius
+      <div>temperature: {temp} Celsius</div>
       <img alt="weather image" src=""></img>
-
+      <div>wind: {wind}</div>
     </div>
   );
 }
