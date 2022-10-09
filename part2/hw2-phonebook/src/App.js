@@ -2,15 +2,17 @@ import { useState } from 'react';
 import { useEffect } from 'react';
 import phonebookService from './services/phonebook';
 import ControlledTextInput from './components/ControlledTextInput';
-import AddContactForm from './components/AddContactForm';
+import AddPersonForm from './components/AddPersonForm';
 import PersonList from './components/PersonList.js';
+import Notification from './components/Notification.js';
+import './index.css';
 
 const App = () => {
   const [persons, setPersons] = useState([]);
   const [newName, setNewName] = useState('');
   const [newNumber, setNewNumber] = useState('');
   const [filter, setFilter] = useState('');
-
+  const [notificationMessage, setNotificationMessage] = useState('');
 
   const hook = () => {
     phonebookService.getAll()
@@ -20,17 +22,13 @@ const App = () => {
   useEffect(hook, []);
 
   const addPerson = (event) => {
+
     event.preventDefault();
-    if (persons.map(p => p.name).includes(newName)) {
-      alert(`${newName} is already added to phonebook`);
-      return;
-    }
-    if (!newName) {
-      alert("Name cannot be blank");
-      return;
-    }
-    if (!newNumber) {
-      alert("Number cannot be blank");
+
+    if (checkBlankInput()) { return; }
+
+    if (nameAlreadyInPhoneBook(newName)) {
+      confirmPersonUpdate();
       return;
     }
 
@@ -40,15 +38,24 @@ const App = () => {
     phonebookService.create(newPerson)
       .then(data => setPersons(persons.concat(data)));
 
-    // setPersons(persons.concat({ name: newName, number: newNumber }));
     setNewName('');
     setNewNumber('');
+    updateNotification(`Added ${newName}`);
+  }
+
+  const updateNumber = (name) => {
+    const index = persons.map(person => person.name).indexOf(name);
+    const newPerson = { ...persons[index], number: newNumber }
+    phonebookService.update(newPerson)
+      .then((data) => setPersons(persons.map(p => p.id !== data.id ? p : data)));
+    setNotificationMessage(`Updated the number of ${newPerson.name}`);
   }
 
   const deletePerson = (person) => {
     if (window.confirm(`Are you sure your want to delete ${person.name}?`)) {
       phonebookService.deletePerson(person);
-      setPersons(persons.filter(p => p.id !== person.id)); 
+      setPersons(persons.filter(p => p.id !== person.id));
+      updateNotification(`Deleted ${person.name}`);
     }
   }
 
@@ -64,14 +71,52 @@ const App = () => {
     setFilter(event.target.value.toLowerCase());
   }
 
-  const personsToDisplay = 
-    persons.filter(person => person.name.toLowerCase().indexOf(filter) !== -1)
+  const updateNotification = (message) => {
+    setNotificationMessage(message);
+    setTimeout(() => { setNotificationMessage('') }, 5000);
+  }
+
+  const checkBlankInput = () => {
+    if (!newName) {
+      alert("Name cannot be blank");
+      return true;
+    }
+    if (!newNumber) {
+      alert("Number cannot be blank");
+      return true;
+    }
+    return false;
+  }
+
+  const nameAlreadyInPhoneBook = (name) => {
+    const index = persons.map(person => person.name).indexOf(name);
+    if (index !== -1) {
+      return true;
+    }
+    return false
+  }
+
+  const confirmPersonUpdate = () => {
+    if (window.confirm(`${newName} is already in the phonebook, replace old number with new one?`)) {
+      updateNumber(newName);
+    }
+  }
+
+  const personsToDisplay =
+    persons.filter(person => person.name.toLowerCase().indexOf(filter) !== -1);
 
   return (
     <div>
       <h1>Phonebook</h1>
+      <Notification message={notificationMessage} />
       <ControlledTextInput onChange={updateFilterInput} value={filter} />
-      <AddContactForm addName={addPerson} onNameChange={updateNameInput} onNumberChange={updateNumberInput} name={newName} number={newNumber} />
+      <AddPersonForm
+        addPerson={addPerson}
+        onNameChange={updateNameInput}
+        onNumberChange={updateNumberInput}
+        name={newName}
+        number={newNumber}
+      />
       <PersonList persons={personsToDisplay} deletePerson={deletePerson} />
     </div>
   )

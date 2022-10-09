@@ -1,7 +1,7 @@
 
 import axios from 'axios';
 
-const url = 'http://localhost:3001/persons';
+const url = 'http://localhost:3001/persons/';
 
 const create = (person) => {
     const requestPromise = axios.post(url, person);
@@ -15,9 +15,14 @@ const getAll = () => {
 }
 
 const deletePerson = (person) => {
-    return axios.delete(url + '/' + person.id);
+    return axios.delete(url + person.id);
 }
 
-const phonebook = { create, getAll, deletePerson };
+const update = (person) => {
+    const request = axios.put(url + person.id, person);
+    return request.then(response => response.data);
+}
+
+const phonebook = { create, getAll, deletePerson, update };
 
 export default phonebook;
