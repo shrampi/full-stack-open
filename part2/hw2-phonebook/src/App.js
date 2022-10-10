@@ -47,8 +47,11 @@ const App = () => {
     const index = persons.map(person => person.name).indexOf(name);
     const newPerson = { ...persons[index], number: newNumber }
     phonebookService.update(newPerson)
-      .then((data) => setPersons(persons.map(p => p.id !== data.id ? p : data)));
-    setNotificationMessage(`Updated the number of ${newPerson.name}`);
+      .then(data => {
+        setPersons(persons.map(p => p.id !== data.id ? p : data));
+        updateNotification(`Updated the number of ${newPerson.name}`);
+      })
+      .catch(() => updateNotification(`${newPerson.name} has already been removed from the server.`));
   }
 
   const deletePerson = (person) => {
