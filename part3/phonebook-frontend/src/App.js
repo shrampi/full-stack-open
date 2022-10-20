@@ -36,7 +36,10 @@ const App = () => {
     const newPerson = { name: newName, number: newNumber, id: newID };
 
     phonebookService.create(newPerson)
-      .then(data => setPersons(persons.concat(data)));
+      .then(data => setPersons(persons.concat(data)))
+      .catch(error => {
+        updateNotification(error.response.data.error);
+      });
 
     setNewName('');
     setNewNumber('');
@@ -50,6 +53,8 @@ const App = () => {
       .then(data => {
         setPersons(persons.map(p => p.id !== data.id ? p : data));
         updateNotification(`Updated the number of ${newPerson.name}`);
+        setNewName('');
+        setNewNumber('');
       })
       .catch(() => updateNotification(`${newPerson.name} has already been removed from the server.`));
   }
