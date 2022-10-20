@@ -1,7 +1,6 @@
-
 require('dotenv').config();
 
-const http = require('http');
+// const http = require('http');
 const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');
@@ -12,22 +11,26 @@ const blogSchema = new mongoose.Schema({
   title: String,
   author: String,
   url: String,
-  likes: Number
+  likes: Number,
 });
 
 const Blog = mongoose.model('Blog', blogSchema);
 
 const mongoUrl = process.env.MONGODB_URI;
-mongoose.connect(mongoUrl);
+
+mongoose.connect(mongoUrl)
+  .then(() => console.log('connected to mongoDB'))
+  .catch((error) => console.log('error connecting to mongoDB: ', error));
 
 app.use(cors());
 app.use(express.json());
 
 app.get('/api/blogs', (request, response) => {
+  console.log('here');
   Blog
     .find({})
     .then((blogs) => {
-      response.json(blogs)
+      response.json(blogs);
     });
 });
 
@@ -37,11 +40,11 @@ app.post('/api/blogs', (request, response) => {
   blog
     .save()
     .then((result) => {
-      response.status(201).json(result)
+      response.status(201).json(result);
     });
 });
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`)
+  console.log(`Server running on port ${PORT}`);
 });

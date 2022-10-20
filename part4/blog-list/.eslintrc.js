@@ -11,7 +11,7 @@ module.exports = {
     ecmaVersion: 'latest',
   },
   rules: {
+    'import/no-extraneous/dependencies': 0,
     'linebreak-style': 0,
-    'import/no-extraneous-dependencies': 0
-  }
+  },
 };
