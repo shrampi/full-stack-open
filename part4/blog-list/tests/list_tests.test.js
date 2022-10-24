@@ -134,4 +134,4 @@ test('favorite blog is correct', () => {
   ];
 
   expect(favoriteBlog(blogs).likes).toBe(12);
-})
+});
