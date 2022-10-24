@@ -71,6 +71,14 @@ test('check status 400 for missing title or url', async () => {
   await api.post('/api/blogs').send(newBlog).expect(400);
 });
 
+test('delete a single blog post', async () => {
+  const blogs = await helper.allBlogs();
+  await api.del(`/api/blogs/${blogs[0].id}`).expect(204);
+
+  const updatedBlogs = await helper.allBlogs();
+  expect(updatedBlogs).toHaveLength(blogs.length - 1);
+});
+
 afterAll(() => {
   mongoose.connection.close();
 });
