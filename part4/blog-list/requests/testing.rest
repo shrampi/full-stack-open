@@ -7,8 +7,8 @@ POST http://localhost:3000/api/blogs
 Content-Type: application/json
 
 {
-    "title": "Heart of Darkness",
-    "author": "Joseph Conrad",
-    "url": "emotionalhaircut.com",
+    "title": "Bob the Clown",
+    "author": "Joe Biden",
+    "url": "maxthedebt.com",
     "likes": 3
 }
