@@ -63,7 +63,6 @@ describe('user tests:', () => {
 
   test('all users retrieved', async () => {
     const res = await api.get('/api/users').expect(200);
-    console.log(res.body);
     expect(res.body).toHaveLength(1);
   })
 })

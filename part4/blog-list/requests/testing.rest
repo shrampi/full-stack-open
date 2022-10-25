@@ -8,7 +8,21 @@ Content-Type: application/json
 
 {
     "title": "Bob the Clown",
-    "author": "Joe Biden",
+    "author": "Mr. Clown",
     "url": "maxthedebt.com",
     "likes": 3
+}
+
+###
+
+GET http://localhost:3000/api/users
+
+###
+
+POST http://localhost:3000/api/users
+Content-Type: application/json
+
+{
+    "username": "root",
+    "password": "secret"
 }

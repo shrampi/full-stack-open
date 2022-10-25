@@ -31,9 +31,9 @@ describe('GET requests:', () => {
     expect(titles).toContain(helper.initialBlogs[0].title);
   });
 
-  test('blog id is called "id"', async () => {
+  test('blog id is called "_id"', async () => {
     const response = await api.get('/api/blogs');
-    expect(response.body[0].id).toBeDefined();
+    expect(response.body[0]._id).toBeDefined();
   });
 });
 
@@ -77,7 +77,7 @@ describe('POST requests:', () => {
 
 test('delete a single blog post', async () => {
   const blogs = await helper.blogsInDB();
-  await api.del(`/api/blogs/${blogs[0].id}`).expect(204);
+  await api.del(`/api/blogs/${blogs[0]._id}`).expect(204);
 
   const updatedBlogs = await helper.blogsInDB();
   expect(updatedBlogs).toHaveLength(blogs.length - 1);
@@ -86,11 +86,9 @@ test('delete a single blog post', async () => {
 test('update a single blog post', async () => {
   const blogs = await helper.blogsInDB();
   const blogToUpdate = blogs[0];
-  console.log(blogToUpdate);
   const newBlog = { ...blogToUpdate, likes: blogToUpdate.likes + 1 };
-  await api.put(`/api/blogs/${blogToUpdate.id}`).send(newBlog).expect(200);
-  const response = await api.get(`/api/blogs/${blogToUpdate.id}`);
-  console.log(response.body);
+  await api.put(`/api/blogs/${blogToUpdate._id}`).send(newBlog).expect(200);
+  const response = await api.get(`/api/blogs/${blogToUpdate._id}`);
   expect(response.body.likes).toBe(blogToUpdate.likes + 1);
 });
 
