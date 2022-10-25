@@ -18,12 +18,8 @@ blogRouter.get('/:id', async (request, response) => {
 });
 
 blogRouter.post('/', async (request, response) => {
-  const decodedToken = jwt.verify(request.token, process.env.SECRET);
-  if (!decodedToken.id) {
-    return response.status(400).send({ error: 'token missing or invalid' });
-  }
-  
-  const user = await User.findOne({ username: decodedToken.username}); 
+
+  const user = await User.findById(request.user); 
   
   if (!user) {
     return response.status(500).send({ error: 'user not in db'});
@@ -40,12 +36,8 @@ blogRouter.post('/', async (request, response) => {
 });
 
 blogRouter.delete('/:id', async (request, response) => {
-  const decodedToken = jwt.verify(request.token, process.env.SECRET);
-  if (!decodedToken.id) {
-    return response.status(400).send({ error: 'token is missing or invalid' });
-  }
+  const user = await User.findById(request.user); 
   
-  const user = await User.findById(decodedToken.id);
   const blogToDelete = await Blog.findById(request.params.id);
   if (!blogToDelete) {
     return response.status(400).send({ error: 'blog does not exist' });
