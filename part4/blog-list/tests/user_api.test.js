@@ -3,6 +3,7 @@ const app = require('../app');
 const bcrypt = require('bcrypt');
 const helper = require('./test_helper')
 const User = require('../models/user');
+const Blog = require('../models/blog');
 
 const api = supertest(app);
 
@@ -15,6 +16,51 @@ describe('user tests:', () => {
       username: 'root'
     })
     await user.save(); 
+    await Blog.deleteMany({});
+    const blogObjects = helper.initialBlogs.map((b) => new Blog(b));
+    const promiseArray = blogObjects.map((b) => b.save());
+    await Promise.all(promiseArray);
+  })
+
+  test('login with correct credentials returns token', async () => {
+    const user = {
+      username: 'root',
+      password: 'secret'
+    }
+
+    const response = await api.post('/api/login').send(user).expect(201);
+    expect(response.body.token).toBeTruthy();
+  })
+
+  test('login with incorrect credentials fails', async () => {
+    const user = {
+      username: 'root',
+      password: 'butt'
+    }
+
+    await api.post('/api/login').send(user).expect(401);
+  })
+
+  test('login and create new post works', async () => {
+    const user = {
+      username: 'root',
+      password: 'secret'
+    }
+
+    const response = await api.post('/api/login').send(user).expect(201);
+    const token = response.body.token;
+
+    const blog = {
+      title: 'Thiccness',
+      author: 'Dummy',
+      url: 'www.usa.gov',
+      likes: 1
+    }
+    const oldBlogs = helper.blogsInDB();
+    await api.post('/api/blogs').set('Authorization', `bearer ${token}`).send(blog).expect(201);
+    const newBlogs = helper.blogsInDB();
+    expect(newBlogs).toHaveLength(oldBlogs.length + 1);
+
   })
 
   test('error when username already in database', async () => {

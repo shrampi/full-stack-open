@@ -3,7 +3,7 @@ const bcrypt = require('bcrypt');
 const User = require('../models/user');
 
 const validateInput = (input) => {
-  return (!input || input.length < 3);
+  return (input && input.length < 3);
 }
 
 userRouter.post('/', async (req, res) => {

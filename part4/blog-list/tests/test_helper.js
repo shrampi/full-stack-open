@@ -1,4 +1,3 @@
-const { map } = require('../app');
 const Blog = require('../models/blog');
 const User = require('../models/user');
 
