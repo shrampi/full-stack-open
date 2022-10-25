@@ -1,10 +1,11 @@
 const logger = require('./logger')
 
 const requestLogger = (request, response, next) => {
+  logger.info('=== Begin Request ===');
   logger.info('Method:', request.method);
   logger.info('Path:  ', request.path);
   logger.info('Body:  ', request.body);
-  logger.info('---');
+  logger.info('=====================');
   next();
 };
 
@@ -30,10 +31,9 @@ const errorHandler = (error, request, response, next) => {
 };
 
 const tokenExtractor = (request, response, next) => {
-  logger.info('extracting token...');
-  
   const authorization = request.get('authorization');
   if (authorization && authorization.toLowerCase().startsWith('bearer ')) {
+    logger.info('extracting token...');
     request.token = authorization.substring(7);
   }
   next();

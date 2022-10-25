@@ -18,8 +18,7 @@ blogRouter.get('/:id', async (request, response) => {
 });
 
 blogRouter.post('/', async (request, response) => {
-  const { token } = request;
-  const decodedToken = jwt.verify(token, process.env.SECRET);
+  const decodedToken = jwt.verify(request.token, process.env.SECRET);
   if (!decodedToken.id) {
     return response.status(400).send({ error: 'token missing or invalid' });
   }
@@ -41,8 +40,23 @@ blogRouter.post('/', async (request, response) => {
 });
 
 blogRouter.delete('/:id', async (request, response) => {
-  await Blog.findByIdAndDelete(request.params.id);
-  response.status(204).send();
+  const decodedToken = jwt.verify(request.token, process.env.SECRET);
+  if (!decodedToken.id) {
+    return response.status(400).send({ error: 'token is missing or invalid' });
+  }
+  
+  const user = await User.findById(decodedToken.id);
+  const blogToDelete = await Blog.findById(request.params.id);
+  if (!blogToDelete) {
+    return response.status(400).send({ error: 'blog does not exist' });
+  }
+
+  if (blogToDelete.user.toString() === user._id.toString()) {
+    await Blog.findByIdAndDelete(request.params.id);
+    logger.info(`user ${user.username} delete blog ${blogToDelete.title}`);
+    return response.status(204).send();
+  }
+  response.status(400).send({ error: `blog does not belong to user ${user.username}` });
 });
 
 blogRouter.put('/:id', async (request, response) => {
