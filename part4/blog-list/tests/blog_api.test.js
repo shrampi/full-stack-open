@@ -13,70 +13,85 @@ beforeEach(async () => {
   await Promise.all(promiseArray);
 });
 
-test('blogs retrieved as json', async () => {
-  await api.get('/api/blogs')
-    .expect(200)
-    .expect('Content-Type', /application\/json/);
+describe('GET requests:', () => {
+  test('blogs retrieved as json', async () => {
+    await api.get('/api/blogs')
+      .expect(200)
+      .expect('Content-Type', /application\/json/);
+  });
+
+  test('all blogs are retreived', async () => {
+    const response = await api.get('/api/blogs');
+    expect(response.body).toHaveLength(helper.initialBlogs.length);
+  });
+
+  test('blog info is correct', async () => {
+    const response = await api.get('/api/blogs');
+    const titles = response.body.map((b) => b.title);
+    expect(titles).toContain(helper.initialBlogs[0].title);
+  });
+
+  test('blog id is called "id"', async () => {
+    const response = await api.get('/api/blogs');
+    expect(response.body[0].id).toBeDefined();
+  });
 });
 
-test('all blogs are retreived', async () => {
-  const response = await api.get('/api/blogs');
-  expect(response.body).toHaveLength(helper.initialBlogs.length);
-});
+describe('POST requests:', () => {
+  test('blog post is successful', async () => {
+    const newBlog = {
+      title: 'The Rice and Beans',
+      author: 'Ms. Monkey',
+      url: 'dingo.com',
+      likes: 20
+    };
 
-test('blog info is correct', async () => {
-  const response = await api.get('/api/blogs');
-  const titles = response.body.map((b) => b.title);
-  expect(titles).toContain(helper.initialBlogs[0].title);
-});
+    await api.post('/api/blogs').send(newBlog)
+      .expect(201);
+    const response = await api.get('/api/blogs');
+    expect(response.body).toHaveLength(helper.initialBlogs.length + 1);
+  });
 
-test('blog id is called "id"', async () => {
-  const response = await api.get('/api/blogs');
-  expect(response.body[0].id).toBeDefined();
-});
+  test('likes default to 0 if empty', async () => {
+    const newBlog = {
+      title: 'The Rice and Beans',
+      author: 'Ms. Monkey',
+      url: 'dingo.com'
+    };
 
-test('blog post is successful', async () => {
-  const newBlog = {
-    title: 'The Rice and Beans',
-    author: 'Ms. Monkey',
-    url: 'dingo.com',
-    likes: 20
-  };
+    await api.post('/api/blogs').send(newBlog)
+      .expect(201);
+    const response = await api.get('/api/blogs');
+    const { likes } = response.body.find((blog) => blog.title === 'The Rice and Beans');
+    expect(likes).toBe(0);
+  });
 
-  await api.post('/api/blogs').send(newBlog)
-    .expect(201);
-  const response = await api.get('/api/blogs');
-  expect(response.body).toHaveLength(helper.initialBlogs.length + 1);
-});
+  test('check status 400 for missing title or url', async () => {
+    const newBlog = {
+      author: 'Ham Man'
+    };
 
-test('likes default to 0 if empty', async () => {
-  const newBlog = {
-    title: 'The Rice and Beans',
-    author: 'Ms. Monkey',
-    url: 'dingo.com'
-  };
-
-  await api.post('/api/blogs').send(newBlog)
-    .expect(201);
-  const response = await api.get('/api/blogs');
-  const { likes } = response.body.find((blog) => blog.title === 'The Rice and Beans');
-  expect(likes).toBe(0);
-});
-
-test('check status 400 for missing title or url', async () => {
-  const newBlog = {
-    author: 'Ham Man'
-  };
-
-  await api.post('/api/blogs').send(newBlog).expect(400);
+    await api.post('/api/blogs').send(newBlog).expect(400);
+  });
 });
 
 test('delete a single blog post', async () => {
-  const blogs = await helper.allBlogs();
+  const blogs = await helper.blogsInDB();
   await api.del(`/api/blogs/${blogs[0].id}`).expect(204);
 
-  const updatedBlogs = await helper.allBlogs();
+  const updatedBlogs = await helper.blogsInDB();
   expect(updatedBlogs).toHaveLength(blogs.length - 1);
+});
+
+test('update a single blog post', async () => {
+  const blogs = await helper.blogsInDB();
+  const blogToUpdate = blogs[0];
+  console.log(blogToUpdate);
+  const newBlog = { ...blogToUpdate, likes: blogToUpdate.likes + 1 };
+  await api.put(`/api/blogs/${blogToUpdate.id}`).send(newBlog).expect(200);
+  const response = await api.get(`/api/blogs/${blogToUpdate.id}`);
+  console.log(response.body);
+  expect(response.body.likes).toBe(blogToUpdate.likes + 1);
 });
 
 afterAll(() => {
