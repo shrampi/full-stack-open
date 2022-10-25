@@ -25,20 +25,28 @@ describe('user tests:', () => {
     await api.post('/api/users').send(user).expect(400);
   })
 
-  test('error for empty username', async () => {
-    const user = {
+  test('error for invalid username', async () => {
+    const user1 = {
       password: 'secret',
-      username: ''
     }
-    await api.post('/api/users').send(user).expect(400);
+    await api.post('/api/users').send(user1).expect(400);
+    const user2 = {
+      password: 'secret',
+      username: 'Do'
+    }
+    await api.post('/api/users').send(user2).expect(400);
   })
 
-  test('error for empty password', async () => {
-    const user = {
-      password: '',
+  test('error for invalid password', async () => {
+    const user1 = {
       username: 'Donkey'
     }
-    await api.post('/api/users').send(user).expect(400);
+    await api.post('/api/users').send(user1).expect(400);
+    const user2 = {
+      username: 'Donkey',
+      password: 'se'
+    }
+    await api.post('/api/users').send(user2).expect(400);
   })
 
   test('single user created', async () => {

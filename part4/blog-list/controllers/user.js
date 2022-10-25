@@ -4,9 +4,15 @@ const User = require('../models/user');
 
 userRouter.post('/', async (req, res) => {
   const { username, password, name } = req.body;
-  if (!username || !password) {
-    return res.status(400).send({ error: 'username and/or password cannot be blank'});
+
+  if (!username || username.length < 3) {
+    return res.status(400).send({ error: 'invalid username'});
   }
+
+  if (!password || password.length < 3) {
+    return res.status(400).send({ error: 'invalid password'});
+  }
+
 
   const saltRounds = 10;
   const passwordHash = await bcrypt.hash(password, saltRounds);
