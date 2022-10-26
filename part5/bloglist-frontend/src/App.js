@@ -29,6 +29,11 @@ const App = () => {
     }
   }, [])
 
+  const notify = (message) => {
+    setNotification(message);
+    setTimeout(() => setNotification(null), 5000);
+  }
+
   const handleLogin = async (event) => {
     event.preventDefault();
 
@@ -43,8 +48,7 @@ const App = () => {
       setPassword('');
 
     } catch (exception) {
-      setNotification('wrong credentials');
-      setTimeout(() => setNotification(null), 5000);
+      notify('wrong credentials')
     }
   }
 
@@ -58,6 +62,10 @@ const App = () => {
       }
       const response = await blogService.create(newBlog);
       setBlogs(blogs.concat(response));
+      notify(`new blog ${blogTitle} by ${blogAuthor} added`)
+      setBlogAuthor('');
+      setBlogTitle('');
+      setBlogUrl('');
     } catch (error) {
       console.log(error.message);
     }
