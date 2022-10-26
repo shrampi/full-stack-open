@@ -34,7 +34,10 @@ const errorHandler = (error, request, response, next) => {
 
 const tokenExtractor = (request, response, next) => {
   const authorization = request.get('authorization');
-  if (authorization && authorization.toLowerCase().startsWith('bearer ')) {
+  if (authorization) {
+    if (!authorization.toLowerCase().startsWith('bearer ')) {
+      return response.status(401).send({ error: 'authorization must begin with "bearer"' });
+    }
     logger.info('extracting token...');
     request.token = authorization.substring(7);
   }

@@ -1,5 +1,4 @@
 const blogRouter = require('express').Router();
-const jwt = require('jsonwebtoken');
 const Blog = require('../models/blog');
 const User = require('../models/user');
 const logger = require('../utils/logger');
@@ -18,11 +17,11 @@ blogRouter.get('/:id', async (request, response) => {
 });
 
 blogRouter.post('/', async (request, response) => {
-
+  
   const user = await User.findById(request.user); 
   
   if (!user) {
-    return response.status(500).send({ error: 'user not in db'});
+    return response.status(400).send({ error: 'user not in db'});
   }
   
   const blog = new Blog({...request.body, user: user._id});
@@ -37,6 +36,10 @@ blogRouter.post('/', async (request, response) => {
 
 blogRouter.delete('/:id', async (request, response) => {
   const user = await User.findById(request.user); 
+
+  if (!user) {
+    return response.status(400).send({ error: 'user not in db'});
+  }
   
   const blogToDelete = await Blog.findById(request.params.id);
   if (!blogToDelete) {
@@ -52,7 +55,6 @@ blogRouter.delete('/:id', async (request, response) => {
 });
 
 blogRouter.put('/:id', async (request, response) => {
-  console.log('here');
   const body = request.body;
   const blog = {
     title: body.title,

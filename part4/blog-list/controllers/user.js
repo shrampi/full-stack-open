@@ -17,16 +17,21 @@ userRouter.post('/', async (req, res) => {
     return res.status(400).send({ error: 'invalid password'});
   }
 
+  const users = await User.find({});
+  if (users.map(u => u.username).includes(username)) {
+    return res.status(400).send({ error: 'user already in database'});
+  }
+
   const saltRounds = 10;
   const passwordHash = await bcrypt.hash(password, saltRounds);
 
-  const user = new User({
+  const newUser = new User({
     username: username,
     password: passwordHash,
     name: name
   });
 
-  const savedUser = await user.save();
+  const savedUser = await newUser.save();
   res.status(201).json(savedUser);
 });
 

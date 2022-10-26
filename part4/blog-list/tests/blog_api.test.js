@@ -2,95 +2,189 @@ const mongoose = require('mongoose');
 const supertest = require('supertest');
 const app = require('../app');
 const Blog = require('../models/blog');
+const User = require('../models/user');
 const helper = require('./test_helper');
+const bcrypt = require('bcrypt');
 
 const api = supertest(app);
 
 beforeEach(async () => {
+  await User.deleteMany({});
+  const passwordHash = await bcrypt.hash('secret', 10);
+  const rootUser = new User({
+    username: 'root',
+    password: passwordHash,
+    name: 'Big Tony'
+  });
+  await rootUser.save();
+
   await Blog.deleteMany({});
   const blogObjects = helper.initialBlogs.map((b) => new Blog(b));
   const promiseArray = blogObjects.map((b) => b.save());
   await Promise.all(promiseArray);
 });
 
-describe('GET requests:', () => {
-  test('blogs retrieved as json', async () => {
-    await api.get('/api/blogs')
-      .expect(200)
-      .expect('Content-Type', /application\/json/);
-  });
-
-  test('all blogs are retreived', async () => {
-    const response = await api.get('/api/blogs');
-    expect(response.body).toHaveLength(helper.initialBlogs.length);
-  });
-
-  test('blog info is correct', async () => {
-    const response = await api.get('/api/blogs');
-    const titles = response.body.map((b) => b.title);
-    expect(titles).toContain(helper.initialBlogs[0].title);
-  });
-
-  test('blog id is called "_id"', async () => {
-    const response = await api.get('/api/blogs');
-    expect(response.body[0]._id).toBeDefined();
-  });
+test('status 401 when wrong password entered', async () => {
+  const credentials = { username: 'root', password: 'dingo' };
+  await api.post('/api/login').send(credentials).expect(401);
 });
 
-describe('POST requests:', () => {
-  test('blog post is successful', async () => {
-    const newBlog = {
-      title: 'The Rice and Beans',
-      author: 'Ms. Monkey',
-      url: 'dingo.com',
-      likes: 20
-    };
-
-    await api.post('/api/blogs').send(newBlog)
-      .expect(201);
-    const response = await api.get('/api/blogs');
-    expect(response.body).toHaveLength(helper.initialBlogs.length + 1);
-  });
-
-  test('likes default to 0 if empty', async () => {
-    const newBlog = {
-      title: 'The Rice and Beans',
-      author: 'Ms. Monkey',
-      url: 'dingo.com'
-    };
-
-    await api.post('/api/blogs').send(newBlog)
-      .expect(201);
-    const response = await api.get('/api/blogs');
-    const { likes } = response.body.find((blog) => blog.title === 'The Rice and Beans');
-    expect(likes).toBe(0);
-  });
-
-  test('check status 400 for missing title or url', async () => {
-    const newBlog = {
-      author: 'Ham Man'
-    };
-
-    await api.post('/api/blogs').send(newBlog).expect(400);
-  });
+test('status 401 when wrong username entered', async () => {
+  const credentials = { username: 'dingo', password: 'secret' };
+  await api.post('/api/login').send(credentials).expect(401);
 });
 
-test('delete a single blog post', async () => {
+test('status 200 when correct credentials entered', async () => {
+  const credentials = { username: 'root', password: 'secret' };
+  await api.post('/api/login').send(credentials).expect(201);
+})
+
+test('status 401 when post a blog with wrong token', async () => {
+  const token = 'nicetry';
+  
+  const blog = {
+    title: 'Pie and Cheese',
+    author: 'dingo',
+    url: 'www.pie.com', 
+    likes: 0
+  }
+
+  await api.post('/api/blogs')
+    .set('Authorization', `bearer ${token}`)
+    .send(blog)
+    .expect(401);
+})
+
+test('post a single blog is successful', async () => {
+  const credentials = { username: 'root', password: 'secret' };
+  const response = await api.post('/api/login').send(credentials).expect(201);
+
+  const token = response.body.token;
+  
+  const blog = {
+    title: 'Pie and Cheese',
+    author: credentials.username,
+    url: 'www.pie.com', 
+    likes: 0
+  }
+
+  const oldBlogs = await helper.blogsInDB();
+
+  await api.post('/api/blogs')
+    .set('Authorization', `bearer ${token}`)
+    .send(blog)
+    .expect(201);
+
+  const newBlogs = await helper.blogsInDB();
+
+  expect(newBlogs).toHaveLength(oldBlogs.length + 1);
+})
+
+test('blogs retrieved as json', async () => {
+  await api.get('/api/blogs')
+    .expect(200)
+    .expect('Content-Type', /application\/json/);
+});
+
+test('all blogs are retreived', async () => {
+  const response = await api.get('/api/blogs');
+  expect(response.body).toHaveLength(helper.initialBlogs.length);
+});
+
+test('blog info is correct', async () => {
+  const response = await api.get('/api/blogs');
+  const titles = response.body.map((b) => b.title);
+  expect(titles).toContain(helper.initialBlogs[0].title);
+});
+
+test('blog id is called "_id"', async () => {
+  const response = await api.get('/api/blogs');
+  expect(response.body[0]._id).toBeDefined();
+});
+
+test('likes default to 0 if empty', async () => {
+
+  const credentials = { username: 'root', password: 'secret' };
+  const response = await api.post('/api/login').send(credentials).expect(201);
+
+  const token = response.body.token;
+
+  const blog = {
+    title: 'Pie and Cheese',
+    author: credentials.username,
+    url: 'www.pie.com'
+  }
+
+  await api.post('/api/blogs')
+    .set('Authorization', `bearer ${token}`)
+    .send(blog)
+    .expect(201);
+
   const blogs = await helper.blogsInDB();
-  await api.del(`/api/blogs/${blogs[0]._id}`).expect(204);
-
-  const updatedBlogs = await helper.blogsInDB();
-  expect(updatedBlogs).toHaveLength(blogs.length - 1);
+  const savedBlog = blogs.find(b => b.title == 'Pie and Cheese');
+  expect(savedBlog.likes).toBe(0);
 });
 
-test('update a single blog post', async () => {
-  const blogs = await helper.blogsInDB();
-  const blogToUpdate = blogs[0];
-  const newBlog = { ...blogToUpdate, likes: blogToUpdate.likes + 1 };
-  await api.put(`/api/blogs/${blogToUpdate._id}`).send(newBlog).expect(200);
-  const response = await api.get(`/api/blogs/${blogToUpdate._id}`);
-  expect(response.body.likes).toBe(blogToUpdate.likes + 1);
+test('status 400 for missing title or url', async () => {
+  const credentials = { username: 'root', password: 'secret' };
+  const response = await api.post('/api/login').send(credentials).expect(201);
+
+  const token = response.body.token;
+
+  const blog = {
+    author: 'Ham Man'
+  };
+
+  await api.post('/api/blogs')
+    .set('Authorization', `bearer ${token}`)
+    .send(blog)
+    .expect(400);
 });
+
+test('login with correct credentials returns token', async () => {
+  const user = {
+    username: 'root',
+    password: 'secret'
+  }
+
+  const response = await api.post('/api/login').send(user).expect(201);
+  expect(response.body.token).toBeTruthy();
+})
+
+test('login with incorrect credentials fails', async () => {
+  const user = {
+    username: 'root',
+    password: 'butt'
+  }
+
+  await api.post('/api/login').send(user).expect(401);
+})
+
+test('error when username already in database', async () => {
+  const user = {
+    password: 'secret',
+    username: 'root'
+  }
+  await api.post('/api/users').send(user).expect(400);
+})
+
+test('single user created', async () => {
+  const oldUsers = await helper.usersInDB();
+  const user = {
+    password: 'secret',
+    username: 'donkey',
+    name: 'Beans'
+  }
+  await api.post('/api/users').send(user).expect(201);
+  const newUsers = await helper.usersInDB();
+
+  expect(newUsers).toHaveLength(oldUsers.length + 1);
+})
+
+test('all users retrieved', async () => {
+  const res = await api.get('/api/users').expect(200);
+  expect(res.body).toHaveLength(1);
+})
 
 afterAll(() => {
   mongoose.connection.close();
