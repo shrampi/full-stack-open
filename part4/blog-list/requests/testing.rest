@@ -1,5 +1,5 @@
 
-POST http://localhost:3000/api/login
+POST http://localhost:3003/api/login
 Content-Type: application/json
 
 {
@@ -9,11 +9,11 @@ Content-Type: application/json
 
 ###
 
-GET http://localhost:3000/api/blogs
+GET http://localhost:3003/api/blogs
 
 ###
 
-POST http://localhost:3000/api/blogs
+POST http://localhost:3003/api/blogs
 Content-Type: application/json
 Authorization: bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InJvb3QiLCJpZCI6IjYzNTgyOGMyYzZmYzdjOGE3MTA5ZDc3ZSIsImlhdCI6MTY2NjczNTk0MH0.p6Arh9wxPzMX5wQXt2lHaAcj1OuHMn44wJ4RD5r8dlY
 
@@ -26,17 +26,17 @@ Authorization: bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InJvb
 
 ###
 
-DELETE http://localhost:3000/api/blogs/63586df6095ec498e8e7fe7f
+DELETE http://localhost:3003/api/blogs/63586df6095ec498e8e7fe7f
 Authorization: bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InJvb3QiLCJpZCI6IjYzNTgyOGMyYzZmYzdjOGE3MTA5ZDc3ZSIsImlhdCI6MTY2NjczNTk0MH0.p6Arh9wxPzMX5wQXt2lHaAcj1OuHMn44wJ4RD5r8dlY
 
 
 ###
 
-GET http://localhost:3000/api/users
+GET http://localhost:3003/api/users
 
 ###
 
-POST http://localhost:3000/api/users
+POST http://localhost:3003/api/users
 Content-Type: application/json
 
 {

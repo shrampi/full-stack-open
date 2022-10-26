@@ -2,7 +2,7 @@
 const ControlledTextInput = (props) => {
     return (
       <div>
-        {props.label}<input onChange={props.onChange} value={props.value} />
+        {`${props.label} `} <input onChange={props.onChange} value={props.value} />
       </div>
     );
 }
