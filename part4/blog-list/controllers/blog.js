@@ -18,26 +18,26 @@ blogRouter.get('/:id', async (request, response) => {
 
 blogRouter.post('/', async (request, response) => {
   
-  const user = await User.findById(request.user); 
+  const userToUpdate = await User.findById(request.user); 
   
-  if (!user) {
+  if (!userToUpdate) {
     return response.status(400).send({ error: 'user not in db'});
   }
   
-  const blog = new Blog({...request.body, user: user._id});
+  const blog = new Blog({...request.body, user: request.user});
   const savedBlog = await blog.save();
 
-  user.blogs = user.blogs.concat(savedBlog._id)
-  await user.save();
+  userToUpdate.blogs = userToUpdate.blogs.concat(savedBlog._id)
+  await userToUpdate.save();
   
-  logger.info(`user ${user.username} added new blog ${savedBlog.title}`);
+  logger.info(`user ${userToUpdate.username} added new blog ${savedBlog.title}`);
   response.status(201).json(savedBlog);
 });
 
 blogRouter.delete('/:id', async (request, response) => {
-  const user = await User.findById(request.user); 
+  const userToUpdate = await User.findById(request.user); 
 
-  if (!user) {
+  if (!userToUpdate) {
     return response.status(400).send({ error: 'user not in db'});
   }
   
@@ -46,12 +46,14 @@ blogRouter.delete('/:id', async (request, response) => {
     return response.status(400).send({ error: 'blog does not exist' });
   }
 
-  if (blogToDelete.user.toString() === user._id.toString()) {
+  if (blogToDelete.user.toString() === request.user) {
     await Blog.findByIdAndDelete(request.params.id);
-    logger.info(`user ${user.username} delete blog ${blogToDelete.title}`);
+    logger.info(`user ${userToUpdate.username} deleted blog ${blogToDelete.title}`);
+    userToUpdate.blogs = userToUpdate.blogs.filter(b => b._id.toString() !== blogToDelete._id.toString());
+
     return response.status(204).send();
   }
-  response.status(400).send({ error: `blog does not belong to user ${user.username}` });
+  response.status(401).send({ error: `blog does not belong to user ${user.username}` });
 });
 
 blogRouter.put('/:id', async (request, response) => {

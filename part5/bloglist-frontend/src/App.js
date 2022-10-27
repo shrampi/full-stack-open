@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react'
-import axios from 'axios'
 import AddBlogForm from './components/AddBlogForm'
 import Blog from './components/Blog'
 import blogService from './services/blogs'
@@ -40,7 +39,6 @@ const App = () => {
 
     try {
       const user = await loginService.login({ username, password });
-
       setUser(user);
       blogService.setToken(user.token);
       window.localStorage.setItem('user', JSON.stringify(user));
@@ -54,7 +52,7 @@ const App = () => {
   }
 
   const addBlog = async (blog) => {
-    console.log(blog)
+    console.log(user)
     try {
       const response = await blogService.create(blog);
       setBlogs(blogs.concat(response));
@@ -76,10 +74,28 @@ const App = () => {
 
   const incrementLikes = (blog) => {
     const updatedBlog = { ...blog, likes: blog.likes + 1 }
-    blogService.update(updatedBlog);
-    const blogToUpdate = blogs.find(b => b._id.toString() === updatedBlog._id.toString())
-    blogToUpdate.likes += 1;
-    setBlogs(blogs.map(b => b._id.toString() === blogToUpdate._id.toString() ? blogToUpdate : b).sort(blogsLikesComparison));
+    blogService.update(updatedBlog)
+      .then(() => {
+        const blogToUpdate = blogs.find(b => b._id.toString() === updatedBlog._id.toString())
+        blogToUpdate.likes += 1;
+        setBlogs(blogs.map(b => b._id.toString() === blogToUpdate._id.toString() ? blogToUpdate : b).sort(blogsLikesComparison));
+      })
+      .catch(error => {
+        console.log('error liking blog:', error.message);
+      });
+
+  }
+
+  const removeBlog = (blog) => {
+    if (window.confirm(`Do you really want to delete ${blog.title}?`)){
+      blogService.remove(blog)
+      .then(() => {
+        setBlogs(blogs.filter(b => b._id.toString() !== blog._id.toString()));
+      })
+      .catch(error => {
+        console.log('error removing blog:', error.message);
+      })
+    }
   }
 
   const logoutButton = () => {
@@ -105,7 +121,7 @@ const App = () => {
       <div>
         <h2>Blogs</h2>
         {blogs.map(blog =>
-          <Blog key={blog._id} blog={blog} incrementLikes={incrementLikes} />
+          <Blog key={blog._id} blog={blog} incrementLikes={incrementLikes} removeBlog={removeBlog}/>
         )}
       </div>
     )
