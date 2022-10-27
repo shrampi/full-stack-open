@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-const Blog = ({ blog }) => {
+const Blog = ({ blog, incrementLikes }) => {
   const [showDetails, setShowDetails] = useState(false);
 
   const hideIfNotVisible = { display: showDetails ? '' : 'none'}
@@ -20,6 +20,7 @@ const Blog = ({ blog }) => {
         </div>
         <div>
           {blog.likes}
+          <button onClick={() => incrementLikes(blog)}>like</button>
         </div>
       </div>
     </div>

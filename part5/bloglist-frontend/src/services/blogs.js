@@ -22,4 +22,9 @@ const create = async (blog) => {
   return response.data;
 }
 
-export default { setToken, getAll, create }
+const update = (blog) => {
+  const request = axios.put(`/api/blogs/${blog._id}`, blog);
+  return request.then(response => response.data);
+}
+
+export default { setToken, getAll, create, update }

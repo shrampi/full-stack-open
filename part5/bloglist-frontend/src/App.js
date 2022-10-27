@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import axios from 'axios'
 import AddBlogForm from './components/AddBlogForm'
 import Blog from './components/Blog'
 import blogService from './services/blogs'
@@ -16,7 +17,7 @@ const App = () => {
 
   useEffect(() => {
     blogService.getAll().then(blogs =>
-      setBlogs(blogs)
+      setBlogs(blogs.sort(blogsLikesComparison))
     )
   }, [])
 
@@ -63,6 +64,24 @@ const App = () => {
     }
   }
 
+  const blogsLikesComparison = (blog1, blog2) => {
+    if (blog1.likes < blog2.likes) {
+      return 1;
+    }
+    if (blog1.likes > blog2.likes) {
+      return -1;
+    }
+    return 0;
+  }
+
+  const incrementLikes = (blog) => {
+    const updatedBlog = { ...blog, likes: blog.likes + 1 }
+    blogService.update(updatedBlog);
+    const blogToUpdate = blogs.find(b => b._id.toString() === updatedBlog._id.toString())
+    blogToUpdate.likes += 1;
+    setBlogs(blogs.map(b => b._id.toString() === blogToUpdate._id.toString() ? blogToUpdate : b).sort(blogsLikesComparison));
+  }
+
   const logoutButton = () => {
     if (user) {
       return (
@@ -86,7 +105,7 @@ const App = () => {
       <div>
         <h2>Blogs</h2>
         {blogs.map(blog =>
-          <Blog key={blog._id} blog={blog} />
+          <Blog key={blog._id} blog={blog} incrementLikes={incrementLikes} />
         )}
       </div>
     )
