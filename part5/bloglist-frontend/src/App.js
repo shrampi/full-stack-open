@@ -89,12 +89,12 @@ const App = () => {
   const removeBlog = (blog) => {
     if (window.confirm(`Do you really want to delete ${blog.title}?`)){
       blogService.remove(blog)
-      .then(() => {
-        setBlogs(blogs.filter(b => b._id.toString() !== blog._id.toString()));
-      })
-      .catch(error => {
-        console.log('error removing blog:', error.message);
-      })
+        .then(() => {
+          setBlogs(blogs.filter(b => b._id.toString() !== blog._id.toString()));
+        })
+        .catch(error => {
+          console.log('error removing blog:', error.message);
+        })
     }
   }
 
@@ -166,7 +166,6 @@ const App = () => {
 
   return (
     <div>
-
       {notification}
       {loginForm()}
       {logoutButton()}
