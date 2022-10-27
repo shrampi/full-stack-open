@@ -18,9 +18,9 @@ const AddBlogForm = (props) => {
         setBlogTitle('');
         setBlogUrl('');
       }}>
-        <div>Title<input type='text' onChange={({ target }) => setBlogTitle(target.value)} value={blogTitle} /></div>
-        <div>Author<input type='text' onChange={({ target }) => setBlogAuthor(target.value)} value={blogAuthor} /></div>
-        <div>Url<input type='text' onChange={({ target }) => setBlogUrl(target.value)} value={blogUrl} /></div>
+        <div>Title<input className='titleInput' type='text' onChange={({ target }) => setBlogTitle(target.value)} value={blogTitle} /></div>
+        <div>Author<input className='authorInput' type='text' onChange={({ target }) => setBlogAuthor(target.value)} value={blogAuthor} /></div>
+        <div>Url<input className='urlInput' type='text' onChange={({ target }) => setBlogUrl(target.value)} value={blogUrl} /></div>
 
         <button type='submit'>add blog</button>
       </form>
