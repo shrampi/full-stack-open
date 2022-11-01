@@ -8,7 +8,7 @@ const Toggleable = (props) => {
   }
 
   const toggleButton = () => {
-    if (visible) { 
+    if (visible) {
       return (<button onClick={toggleVisibility}>cancel</button>)
     }
     return (<button onClick={toggleVisibility}>{props.label}</button>)
