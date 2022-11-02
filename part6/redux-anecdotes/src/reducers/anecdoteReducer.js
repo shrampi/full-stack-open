@@ -17,15 +17,7 @@ const asObject = (anecdote) => {
   }
 }
 
-const voteComparison = (anecdote1, anecdote2) => {
-  if (anecdote1.votes < anecdote2.votes) {
-    return 1;
-  }
-  if (anecdote1.votes > anecdote2.votes) {
-    return -1;
-  }
-  return 0;
-}
+
 
 const initialState = anecdotesAtStart.map(asObject)
 
@@ -49,7 +41,7 @@ const reducer = (state = initialState, action) => {
       const id = action.data;
       const anecdoteToChange = state.find(a => a.id === id);
       const changedAnecdote = {...anecdoteToChange, votes: anecdoteToChange.votes + 1};
-      return state.map(a => a.id === id ? changedAnecdote : a).sort(voteComparison);
+      return state.map(a => a.id === id ? changedAnecdote : a);
     case 'ADD':
       return state.concat(action.data);
     default:
