@@ -1,10 +1,11 @@
 import { useDispatch, useSelector } from 'react-redux';
-import { voteAction } from '../reducers/anecdoteReducer';
+import { voteForAnecdote } from '../reducers/anecdoteReducer';
 import { addNotification, removeNotification } from '../reducers/notificationReducer';
 
 const AnecdoteList = () => {
 
   const dispatch = useDispatch();
+
   const voteComparison = (anecdote1, anecdote2) => {
     if (anecdote1.votes < anecdote2.votes) {
       return 1;
@@ -14,18 +15,18 @@ const AnecdoteList = () => {
     }
     return 0;
   }
+
   const anecdotes = useSelector(
     state => {
-      return state.anecdotes
+      return [...state.anecdotes]
         .sort(voteComparison)
         .filter(a => a.content.includes(state.filter))
     }
   );
-
-
-
+  
+  // TODO: this needs to make a put request to server
   const vote = (anecdote) => {
-    dispatch(voteAction(anecdote.id));
+    dispatch(voteForAnecdote(anecdote.id));
     dispatch(addNotification(`voted for ${anecdote.content}`));
     setTimeout(() => { dispatch(removeNotification()) }, 5000);
   }
