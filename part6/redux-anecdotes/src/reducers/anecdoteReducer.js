@@ -1,4 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit';
+import anecdoteService from '../services/anecdoteService';
 
 const anecdotesAtStart = [
   'If it hurts, do it more often',
@@ -13,15 +14,15 @@ export const getId = () => (100000 * Math.random()).toFixed(0)
 
 // BELOW IS THE REDUX REDUCER / ACTION CREATORS WITHOUT USING TOOLKIT SLICES
 
-const asObject = (anecdote) => {
-  return {
-    content: anecdote,
-    id: getId(),
-    votes: 0
-  }
-}
+// const asObject = (anecdote) => {
+//   return {
+//     content: anecdote,
+//     id: getId(),
+//     votes: 0
+//   }
+// }
 
-const initialState = anecdotesAtStart.map(asObject)
+// const initialState = anecdotesAtStart.map(asObject)
 
 // export const voteAction = (id) => {
 //   return {
@@ -61,7 +62,7 @@ const anecdoteSlice = createSlice({
       const changedAnecdote = {...anecdoteToChange, votes: anecdoteToChange.votes + 1};
       return state.map(a => a.id === id ? changedAnecdote : a); 
     },
-    createAnecdote: (state, action) => {
+    appendAnecdote: (state, action) => {
       return state.concat(action.payload);
     },
     setAnecdotes: (state, action) => {
@@ -70,5 +71,29 @@ const anecdoteSlice = createSlice({
   }
 })
 
-export const { voteForAnecdote, createAnecdote, setAnecdotes } = anecdoteSlice.actions;
+export const { voteForAnecdote, appendAnecdote, setAnecdotes } = anecdoteSlice.actions;
+
+export const initializeAnecdotes = () => {
+  return async (dispatch) => {
+    const anecdotes = await anecdoteService.getAll();
+    dispatch(setAnecdotes(anecdotes));
+  }
+}
+
+export const createAnecdote = (content) => {
+  return async (dispatch) => {
+    const newAnecdote = await anecdoteService.create(content);
+    dispatch(appendAnecdote(newAnecdote));
+  }
+}
+
+export const incrementVoteFor = (anecdote) => {
+  return async (dispatch) => {
+    const newAnecdote = {...anecdote, votes: anecdote.votes + 1};
+    await anecdoteService.update(newAnecdote);
+    dispatch(voteForAnecdote(anecdote.id));
+  }
+}
+
+
 export default anecdoteSlice.reducer;

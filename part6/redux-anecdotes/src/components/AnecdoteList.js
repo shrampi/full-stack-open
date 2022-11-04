@@ -1,6 +1,6 @@
 import { useDispatch, useSelector } from 'react-redux';
-import { voteForAnecdote } from '../reducers/anecdoteReducer';
-import { addNotification, removeNotification } from '../reducers/notificationReducer';
+import { incrementVoteFor } from '../reducers/anecdoteReducer';
+import { setNotification } from '../reducers/notificationReducer';
 
 const AnecdoteList = () => {
 
@@ -23,12 +23,10 @@ const AnecdoteList = () => {
         .filter(a => a.content.includes(state.filter))
     }
   );
-  
-  // TODO: this needs to make a put request to server
+
   const vote = (anecdote) => {
-    dispatch(voteForAnecdote(anecdote.id));
-    dispatch(addNotification(`voted for ${anecdote.content}`));
-    setTimeout(() => { dispatch(removeNotification()) }, 5000);
+    dispatch(incrementVoteFor(anecdote));
+    dispatch(setNotification(`voted for ${anecdote.content}`, 5));
   }
 
   return (
