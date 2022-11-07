@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Routes, Route, Link } from 'react-router-dom'
+import { Routes, Route, Link, useParams, useNavigate } from 'react-router-dom'
 
 const Menu = () => {
   const padding = {
@@ -18,10 +18,29 @@ const AnecdoteList = ({ anecdotes }) => (
   <div>
     <h2>Anecdotes</h2>
     <ul>
-      {anecdotes.map(anecdote => <li key={anecdote.id} >{anecdote.content}</li>)}
+      {anecdotes.map(anecdote =>
+        <li key={anecdote.id} >
+          <Link to={`/anecdotes/${anecdote.id}`}>{anecdote.content}</Link>
+        </li>
+      )}
     </ul>
   </div>
 )
+
+const Anecdote = (props) => {
+  const id = useParams().id;
+  const anecdote = props.anecdotes.find(a => a.id === Number(id));
+  const style = {
+    padding: 5
+  }
+  return (
+    <div>
+      <h2>{anecdote.content}</h2>
+      <div style={style}>has {anecdote.votes} votes</div>
+      <div style={style}>for more info see <a href={anecdote.info}>here</a></div>
+    </div>
+  )
+}
 
 const About = () => (
   <div>
@@ -85,6 +104,7 @@ const CreateNew = (props) => {
 }
 
 const App = () => {
+  const nav = useNavigate();
   const [anecdotes, setAnecdotes] = useState([
     {
       content: 'If it hurts, do it more often',
@@ -107,6 +127,11 @@ const App = () => {
   const addNew = (anecdote) => {
     anecdote.id = Math.round(Math.random() * 10000)
     setAnecdotes(anecdotes.concat(anecdote))
+    setNotification(`a new anecdote ${anecdote.content} created!`);
+    setTimeout(() => {
+      setNotification('');
+    }, 5000);
+    nav('/anecdotes');
   }
 
   const anecdoteById = (id) =>
@@ -127,7 +152,9 @@ const App = () => {
     <div>
       <h1>Software anecdotes</h1>
       <Menu />
+      <div>{notification}</div>
       <Routes>
+        <Route path='/anecdotes/:id' element={<Anecdote anecdotes={anecdotes} />} />
         <Route path='/anecdotes' element={<AnecdoteList anecdotes={anecdotes} />} />
         <Route path='/about' element={<About />} />
         <Route path='/create' element={<CreateNew addNew={addNew} />} />
