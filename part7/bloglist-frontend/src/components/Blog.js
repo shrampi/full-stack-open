@@ -1,13 +1,14 @@
 import { useState } from 'react';
 import PropTypes from 'prop-types';
+import { incrementLikes, removeBlog } from '../reducers/blogs';
+import { useDispatch } from 'react-redux';
 
-const Blog = ({ blog, incrementLikes, removeBlog }) => {
+const Blog = ({ blog }) => {
   const [showDetails, setShowDetails] = useState(false);
+  const dispatch = useDispatch();
 
   Blog.propTypes = {
     blog: PropTypes.object.isRequired,
-    incrementLikes: PropTypes.func.isRequired,
-    removeBlog: PropTypes.func.isRequired,
   };
 
   const hideIfNotVisible = { display: showDetails ? '' : 'none' };
@@ -28,10 +29,10 @@ const Blog = ({ blog, incrementLikes, removeBlog }) => {
         <div className="blogUrl">{blog.url}</div>
         <div className="blogLikes">
           {blog.likes}
-          <button onClick={() => incrementLikes(blog)}>like</button>
+          <button onClick={() => dispatch(incrementLikes(blog))}>like</button>
         </div>
         <div>
-          <button onClick={() => removeBlog(blog)}>remove</button>
+          <button onClick={() => dispatch(removeBlog(blog))}>remove</button>
         </div>
       </div>
     </div>
