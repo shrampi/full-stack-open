@@ -8,54 +8,39 @@ import loginService from './services/login';
 import { notify } from './reducers/notification';
 import { initializeBlogs } from './reducers/blogs';
 import { useDispatch, useSelector } from 'react-redux';
+import { checkLocalStorageForUser, login, logout } from './reducers/user';
 
 const App = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [user, setUser] = useState(null);
 
   const dispatch = useDispatch();
   const state = useSelector(state => state);
 
   useEffect(() => {
     dispatch(initializeBlogs());
-  }, []);
-
-  useEffect(() => {
-    const userJSON = window.localStorage.getItem('user');
-    if (userJSON) {
-      const user = JSON.parse(userJSON);
-      setUser(user);
-      blogService.setToken(user.token);
-    }
+    dispatch(checkLocalStorageForUser());
   }, []);
 
   const handleLogin = async (event) => {
     event.preventDefault();
-
     try {
-      const user = await loginService.login({ username, password });
-      setUser(user);
-      blogService.setToken(user.token);
-      window.localStorage.setItem('user', JSON.stringify(user));
-
+      dispatch(login(username, password));
       setUsername('');
       setPassword('');
-    } catch (exception) {
-      
+    } catch {
       notify('wrong credentials');
     }
   };
 
   const logoutButton = () => {
-    if (user) {
+    if (state.user) {
       return (
         <div>
-          {`logged in as ${user.username}`}
+          {`logged in as ${state.user.username}`}
           <button
             onClick={() => {
-              setUser(null);
-              window.localStorage.removeItem('user');
+              dispatch(logout());
             }}
           >
             logout
@@ -80,12 +65,12 @@ const App = () => {
   };
 
   const loginForm = () => {
-    const showWhenUserNotLoggedIn = { display: user ? 'none' : '' };
+    const showWhenUserNotLoggedIn = { display: state.user ? 'none' : '' };
 
     return (
       <div style={showWhenUserNotLoggedIn}>
         <Toggleable
-          visible={user ? false : true}
+          visible={state.user ? false : true}
           label={'click here to log in'}
         >
           <LoginForm
@@ -101,7 +86,7 @@ const App = () => {
   };
 
   const blogForm = () => {
-    const showWhenUserLoggedIn = { display: user ? '' : 'none' };
+    const showWhenUserLoggedIn = { display: state.user ? '' : 'none' };
     return (
       <div style={showWhenUserLoggedIn}>
         <Toggleable visible={false} label={'new blog'}>
@@ -117,7 +102,7 @@ const App = () => {
       {loginForm()}
       {logoutButton()}
       {blogForm()}
-      {user !== null && blogsDisplay()}
+      {state.user !== null && blogsDisplay()}
     </div>
   );
 };
