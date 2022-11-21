@@ -4,6 +4,41 @@ Deep Dive Into Modern Web Development
 
 https://fullstackopen.com/en/
 
+# TODO
+- 5.17 - 5.22: e2e testing with cypress
+- 6.19 - 6.21: 'connect' alternative to hooks for redux
+
+## Part 0
+
+### Order of Operations for a simple page: 
+- GET request for html
+- script tag in html makes GET call for css, js
+- browser starts executing js code, which makes GET call to server
+- server returns response, maybe json data
+
+### Forms
+- By default, forms send a POST request to the url specified by their 'action' attribute
+	- Server responds with a URL redirect status 302, which directs the browser to make a GET request to another page
+- we can prevent these requests with the preventDefault() method
+
+
+## Part 1
+
+### Javascript 'this'
+
+Suppose we have this object:
+
+	const person = {
+		name: "Tom Dingles"
+		greet: function() {
+			console.log('hi, my name is ' + this.name);
+		}
+	}
+
+If we call `person.greet()`, that will work fine. `this` still references the enclosing object. But if we assign the function to a reference, `const referenceToGreet = person.greet` then `this` refers to the global scope. So `this.name` is either undefined, or something else. 
+
+This problem also arises if we call `person.greet` in a callback, like in setTimeout(). 
+
 ## Part 7
 
 ### React-router
